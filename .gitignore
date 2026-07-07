@@ -1,21 +1,43 @@
-# Infotact Project - Prevent Repository Bloat
+<<<<<<< HEAD
+# ==============================
+# Python
+# ==============================
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ==============================
+# Archive files
+# ==============================
 *.zip
 *.tar.gz
 *.tgz
 
-# Ignore raw data directories
+# ==============================
+# Dataset
+# ==============================
 /data/
 /dataset/
 PlantVillage/
 
-# Block compiled model weights and serialized objects
+# ==============================
+# Model files
+# ==============================
+*.keras
 *.h5
 *.pkl
 *.pth
 *.saved_model/
 
-# Python environment files
-__pycache__/
-*.pyc
-.env
+# ==============================
+# Jupyter
+# ==============================
 .ipynb_checkpoints/
+
+# ==============================
+# Outputs
+# ==============================
+outputs/
+>>>>>>> origin/main
