@@ -1,3 +1,4 @@
+# app.py
 import os
 import time
 import random
@@ -27,7 +28,8 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DEFAULT_MODEL_PATH = os.path.join(BASE_DIR, "models", "optimized_mobilenet.keras")
 FALLBACK_MODEL_PATH = os.path.join(BASE_DIR, "models", "baseline_cnn.keras")
 
-CLASS_NAMES = ["Tomato Early Blight", "Tomato Healthy", "Tomato Late Blight"]
+# VERIFIED ASCII ALPHABETICAL ORDERING (Matches your terminal output exactly)
+CLASS_NAMES = ["Tomato Early Blight", "Tomato Late Blight", "Tomato Healthy"]
 
 # Actionable Treatment Protocols Database
 TREATMENT_GUIDES = {
@@ -56,7 +58,7 @@ TREATMENT_GUIDES = {
 # ==========================================
 @st.cache_resource
 def load_classifier():
-    """Loads the trained Keras model with automatic fallback logic."""
+    """Loads the trained Keras model into memory once with automatic fallback logic."""
     if os.path.exists(DEFAULT_MODEL_PATH):
         return tf.keras.models.load_model(DEFAULT_MODEL_PATH), "Optimized MobileNetV2"
     elif os.path.exists(FALLBACK_MODEL_PATH):
@@ -185,9 +187,8 @@ if input_image is not None:
         with st.spinner("Executing neural feature extraction..."):
             start_time = time.time()
 
-            # Inference (shared logic with src/predict.py so CLI and app
-            # never drift out of sync on preprocessing).
-            predicted_label, confidence, all_probs = predict_image(
+            # Execute shared inference logic from src/predict.py
+            predicted_label, confidence, all_probs_dict = predict_image(
                 model, input_image, class_names=CLASS_NAMES
             )
             latency_ms = (time.time() - start_time) * 1000
@@ -199,9 +200,9 @@ if input_image is not None:
         else:
             st.error(f"### PATHOGEN DETECTED: {predicted_label}\n**Confidence Score:** `{confidence:.2f}%` | **Latency:** `{latency_ms:.1f} ms`")
 
-        # Probability Distribution
-        st.markdown("#### Class Confidence Distribution")
-        st.bar_chart(all_probs)
+        # Probability Distribution Chart
+        st.markdown("#### Class Confidence Distribution (%)")
+        st.bar_chart(all_probs_dict)
 
     st.markdown("---")
 
