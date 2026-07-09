@@ -1,4 +1,3 @@
-# app.py
 import os
 import time
 import random
@@ -12,26 +11,151 @@ import tensorflow as tf
 from src.predict import predict_image
 
 # ==========================================
-# 1. PAGE CONFIGURATION & THEMING
+# 1. PAGE CONFIGURATION & ENTERPRISE UI THEMING
 # ==========================================
 st.set_page_config(
-    page_title="AgriVision Pro | Crop Disease Portal",
+    page_title="CropSense AI | Smart Plant Health",
     page_icon="🌿",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
+# Injecting Advanced CSS: Google Fonts, Gradients, Glassmorphism & UI Cards
+st.markdown("""
+<style>
+    /* Import Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+    /* Global Typography & Background */
+    html, body, [class*="css"] {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: #1f2937;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        letter-spacing: -0.02em;
+    }
+    
+    /* Subtle Agricultural Theme Background Gradient */
+    .stApp {
+        background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 40%, #ecfdf5 100%);
+    }
+
+    /* Hero Header Container */
+    .hero-container {
+        text-align: center;
+        padding: 30px 20px;
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid #d1fae5;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px -5px rgba(5, 150, 105, 0.05);
+        margin-bottom: 25px;
+        backdrop-filter: blur(10px);
+    }
+    .gradient-title {
+        background: linear-gradient(135deg, #059669 0%, #10b981 50%, #047857 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+        font-size: 3.2rem;
+        margin-bottom: 5px;
+    }
+    .hero-heading {
+        color: #111827;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-top: 0px;
+        margin-bottom: 12px;
+    }
+    .hero-subtitle {
+        color: #4b5563;
+        font-size: 1.05rem;
+        max-width: 700px;
+        margin: 0 auto 18px auto;
+        line-height: 1.6;
+    }
+    .feature-badge {
+        display: inline-block;
+        background: #d1fae5;
+        color: #065f46;
+        padding: 6px 16px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin: 4px;
+        border: 1px solid #a7f3d0;
+    }
+
+    /* Modern UI Cards for Sections */
+    .ui-card {
+        background: #ffffff;
+        padding: 24px;
+        border-radius: 16px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+        margin-bottom: 20px;
+    }
+
+    /* Pulsing Biohazard Alert for Diseased Plants */
+    .pulse-alert {
+        animation: pulse-red 2s infinite;
+        border-radius: 16px;
+        padding: 20px;
+        background: linear-gradient(135deg, #fef2f2 0%, #fff5f5 100%);
+        color: #991b1b;
+        border: 2px solid #ef4444;
+        box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.1);
+    }
+    @keyframes pulse-red {
+        0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+        70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    /* Success Healthy Badge */
+    .healthy-badge {
+        border-radius: 16px;
+        padding: 20px;
+        background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+        color: #065f46;
+        border: 2px solid #10b981;
+        box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.1);
+    }
+
+    /* Sidebar Styling */
+    .sidebar-logo {
+        font-size: 4rem;
+        line-height: 1;
+        margin-bottom: 5px;
+        filter: drop-shadow(0px 4px 8px rgba(16, 185, 129, 0.25));
+    }
+    .online-dot {
+        height: 10px;
+        width: 10px;
+        background-color: #10b981;
+        border-radius: 50%;
+        display: inline-block;
+        animation: pulse-green 2s infinite;
+        margin-right: 6px;
+    }
+    @keyframes pulse-green {
+        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+        70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # ==========================================
-# 2. DYNAMIC PATH RESOLUTION & CONSTANTS
+# 2. PATH RESOLUTION & CONSTANTS
 # ==========================================
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DEFAULT_MODEL_PATH = os.path.join(BASE_DIR, "models", "optimized_mobilenet.keras")
 FALLBACK_MODEL_PATH = os.path.join(BASE_DIR, "models", "baseline_cnn.keras")
 
-# VERIFIED ASCII ALPHABETICAL ORDERING (Matches your terminal output exactly)
+# VERIFIED ASCII ALPHABETICAL ORDERING (E -> L -> h)
 CLASS_NAMES = ["Tomato Early Blight", "Tomato Late Blight", "Tomato Healthy"]
 
-# Actionable Treatment Protocols Database
 TREATMENT_GUIDES = {
     "Tomato Early Blight": {
         "pathogen": "Alternaria solani (Fungal Spores)",
@@ -54,11 +178,10 @@ TREATMENT_GUIDES = {
 }
 
 # ==========================================
-# 3. HELPER FUNCTIONS & QUALITY GUARDRAILS
+# 3. HELPER FUNCTIONS
 # ==========================================
 @st.cache_resource
 def load_classifier():
-    """Loads the trained Keras model into memory once with automatic fallback logic."""
     if os.path.exists(DEFAULT_MODEL_PATH):
         return tf.keras.models.load_model(DEFAULT_MODEL_PATH), "Optimized MobileNetV2"
     elif os.path.exists(FALLBACK_MODEL_PATH):
@@ -66,15 +189,13 @@ def load_classifier():
     return None, None
 
 def check_image_sharpness(pil_img, threshold=80.0):
-    """Calculates the variance of the Laplacian using OpenCV to detect blurry images."""
-    open_cv_image = np.array(pil_img.convert('L'))  # Convert to grayscale
+    open_cv_image = np.array(pil_img.convert('L'))
     laplacian_var = cv2.Laplacian(open_cv_image, cv2.CV_64F).var()
     return laplacian_var, laplacian_var >= threshold
 
 def generate_report_text(label, conf, latency, temp, hum, guide):
-    """Compiles a professional text report for download."""
     report = f"""==================================================
-AGRIVISION PRO | FIELD DIAGNOSTIC CERTIFICATE
+CROPSENSE AI | FIELD DIAGNOSTIC CERTIFICATE
 ==================================================
 Scan Timestamp  : {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 Field Location  : Sector 4-B (Geotag: 13.0827° N, 80.2707° E)
@@ -98,7 +219,7 @@ Risk Level      : {guide['risk']}
 {guide['fungicide']}
 
 ==================================================
-Report generated automatically by AgriVision Pro Edge System.
+Report generated automatically by CropSense AI Edge System.
 """
     return report
 
@@ -108,9 +229,9 @@ Report generated automatically by AgriVision Pro Edge System.
 model, model_name = load_classifier()
 
 with st.sidebar:
-    st.image("https://img.icons8.com/color/96/000000/sprout.png", width=64)
-    st.title("AgriVision Edge")
-    st.caption("Professional Crop Screening Portal")
+    st.markdown('<div class="sidebar-logo">🌿</div>', unsafe_allow_html=True)
+    st.markdown("<h2 style='margin-bottom: 2px; color: #059669; font-size: 1.8rem;'>CropSense AI</h2>", unsafe_allow_html=True)
+    st.caption("Powered by MobileNetV2 & TensorFlow")
     st.markdown("---")
     
     st.subheader("📡 Live Microclimate")
@@ -127,19 +248,32 @@ with st.sidebar:
     st.markdown("---")
     st.subheader("⚙️ System Status")
     if model is not None:
-        st.success(f"**Engine:** `{model_name}`\n\n**Status:** Online & Ready")
+        st.markdown(f"**Engine:** `{model_name}`")
+        st.markdown("<div class='online-dot'></div> <b>Online & Ready</b>", unsafe_allow_html=True)
     else:
         st.error("**Engine:** Offline\n\nNo weights found in `models/`.")
         
     st.markdown("---")
-    st.caption("© 2026 Infotact Engineering Team")
+    st.caption("Developed by Infotact DS & ML Engineering Team")
 
 # ==========================================
-# 5. MAIN DASHBOARD UI
+# 5. MAIN DASHBOARD UI (HERO BANNER)
 # ==========================================
-st.title("🌿 Intelligent Crop Disease Detection & Decision Support")
-st.markdown("Deploy computer vision and hydrothermal telemetry to diagnose plant pathology in real time.")
-st.markdown("---")
+st.markdown("""
+<div class="hero-container">
+    <div class="gradient-title">🌿 CropSense AI</div>
+    <div class="hero-heading">Smart Crop Disease Intelligence Platform</div>
+    <div class="hero-subtitle">
+        Deploying computer vision and hydrothermal edge telemetry to diagnose botanical pathology in real time. 
+        Get instant laboratory-grade precision in the field.
+    </div>
+    <div>
+        <span class="feature-badge">⚡ Deep Learning Powered</span>
+        <span class="feature-badge">🔍 Real-Time Diagnosis</span>
+        <span class="feature-badge">💊 Actionable Protocols</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 if model is None:
     st.error("❌ **System Offline:** Could not locate model weights. Please ensure `models/optimized_mobilenet.keras` exists!")
@@ -165,50 +299,77 @@ with tab_camera:
         source_name = "Live_Camera_Snapshot.jpg"
 
 # ==========================================
-# 6. INFERENCE & DIAGNOSTIC ENGINE
+# 6. ANIMATED INFERENCE & DIAGNOSTIC ENGINE
 # ==========================================
 if input_image is not None:
-    col_img, col_results = st.columns([1, 1.2])
+    st.toast('Specimen ingested successfully! Initializing AI scan...', icon='⚡')
+    
+    col_img, col_results = st.columns([1, 1.25])
     
     with col_img:
-        st.subheader("🖼️ Specimen Ingestion")
+        st.markdown('<div class="ui-card">', unsafe_allow_html=True)
+        st.subheader("🖼️ Specimen Specimen")
         st.image(input_image, caption=f"Source: {source_name}", use_container_width=True)
         
-        # Quality Guardrail Check
         sharpness_score, is_sharp = check_image_sharpness(input_image)
         if not is_sharp:
-            st.warning(f"⚠️ **Image Quality Guard:** This photo appears slightly blurry (Sharpness Index: `{sharpness_score:.1f}`). For maximum AI accuracy, ensure steady focus and adequate field lighting.")
+            st.warning(f"⚠️ **Quality Guard:** Photo appears slightly blurry (Sharpness Index: `{sharpness_score:.1f}`).")
         else:
             st.caption(f"🔒 **Quality Check Passed** (Sharpness Index: `{sharpness_score:.1f}`)")
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with col_results:
+        st.markdown('<div class="ui-card">', unsafe_allow_html=True)
         st.subheader("🔍 AI Diagnostic Analysis")
         
-        with st.spinner("Executing neural feature extraction..."):
-            start_time = time.time()
+        # ANIMATED SCANNING PROGRESS BAR
+        scan_bar = st.progress(0)
+        status_text = st.empty()
+        
+        start_time = time.time()
+        
+        # Simulate scanning animation before actual prediction
+        for percent_complete in range(0, 101, 20):
+            time.sleep(0.08)
+            scan_bar.progress(percent_complete)
+            status_text.caption(f"Extracting neural features... {percent_complete}%")
+            
+        status_text.empty()
+        scan_bar.empty()
+        
+        # Execute actual inference logic
+        predicted_label, confidence, all_probs_dict = predict_image(
+            model, input_image, class_names=CLASS_NAMES
+        )
+        latency_ms = (time.time() - start_time) * 1000
+        guide = TREATMENT_GUIDES[predicted_label]
 
-            # Execute shared inference logic from src/predict.py
-            predicted_label, confidence, all_probs_dict = predict_image(
-                model, input_image, class_names=CLASS_NAMES
-            )
-            latency_ms = (time.time() - start_time) * 1000
-            guide = TREATMENT_GUIDES[predicted_label]
-
-        # Primary Status Banner
+        # PROFESSIONAL SERIOUS RESULTS
         if "Healthy" in predicted_label:
-            st.success(f"### Diagnosis: {predicted_label}\n**Confidence Score:** `{confidence:.2f}%` | **Latency:** `{latency_ms:.1f} ms`")
+            st.markdown(f"""
+            <div class="healthy-badge">
+                <h3 style='margin:0; color:#065f46;'>🌱 STATUS: {predicted_label.upper()}</h3>
+                <p style='margin: 5px 0 0 0; font-size: 0.95rem;'><b>Confidence Score:</b> {confidence:.2f}% &nbsp;|&nbsp; <b>Latency:</b> {latency_ms:.1f} ms</p>
+            </div>
+            <br>
+            """, unsafe_allow_html=True)
         else:
-            st.error(f"### PATHOGEN DETECTED: {predicted_label}\n**Confidence Score:** `{confidence:.2f}%` | **Latency:** `{latency_ms:.1f} ms`")
+            st.markdown(f"""
+            <div class="pulse-alert">
+                <h3 style='margin:0; color:#991b1b;'>🚨 PATHOGEN DETECTED: {predicted_label.upper()}</h3>
+                <p style='margin: 5px 0 0 0; font-size: 0.95rem;'><b>Confidence Score:</b> {confidence:.2f}% &nbsp;|&nbsp; <b>Latency:</b> {latency_ms:.1f} ms</p>
+            </div>
+            <br>
+            """, unsafe_allow_html=True)
 
-        # Probability Distribution Chart
         st.markdown("#### Class Confidence Distribution (%)")
         st.bar_chart(all_probs_dict)
-
-    st.markdown("---")
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # ==========================================
-    # 7. ACTIONABLE DECISION SUPPORT & TREATMENT
+    # 7. ACTIONABLE DECISION SUPPORT
     # ==========================================
+    st.markdown('<div class="ui-card">', unsafe_allow_html=True)
     st.subheader("📋 Targeted Treatment & Mitigation Protocol")
     
     col_proto1, col_proto2, col_proto3 = st.columns(3)
@@ -225,12 +386,12 @@ if input_image is not None:
     with col_proto3:
         st.markdown("#### 💊 Fungicide Guidelines")
         st.write(guide['fungicide'])
-        
-    st.markdown("---")
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # ==========================================
     # 8. EXPORTABLE REPORT GENERATION
     # ==========================================
+    st.markdown('<div class="ui-card" style="background: #f8fafc;">', unsafe_allow_html=True)
     st.subheader("📤 Export Field Certificate")
     st.write("Download an official text summary of this screening for farm records or agricultural insurance compliance.")
     
@@ -248,10 +409,11 @@ if input_image is not None:
     st.download_button(
         label="📄 Download Diagnostic Certificate (.TXT)",
         data=report_content,
-        file_name=f"AgriVision_Report_{file_timestamp}.txt",
+        file_name=f"CropSense_Report_{file_timestamp}.txt",
         mime="text/plain",
         use_container_width=True
     )
+    st.markdown('</div>', unsafe_allow_html=True)
 
 elif input_image is None:
     st.info("👆 Please upload a leaf photo or capture a live camera snapshot above to initiate AI diagnostic screening.")
