@@ -25,7 +25,10 @@ PlantVillage/
 # ==============================
 # Model files
 # ==============================
+# Ignore all keras files except deployment models
 models/*.keras
+!models/baseline_cnn.keras
+!models/optimized_mobilenet.keras
 models/*.h5
 *.pkl
 *.pth
