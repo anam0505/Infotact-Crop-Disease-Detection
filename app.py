@@ -23,10 +23,8 @@ st.set_page_config(
 # Injecting Advanced CSS: Google Fonts, Gradients, Glassmorphism & UI Cards
 st.markdown("""
 <style>
-    /* Import Google Fonts */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 
-    /* Global Typography & Background */
     html, body, [class*="css"] {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         color: #1f2937;
@@ -36,12 +34,10 @@ st.markdown("""
         letter-spacing: -0.02em;
     }
     
-    /* Subtle Agricultural Theme Background Gradient */
     .stApp {
         background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 40%, #ecfdf5 100%);
     }
 
-    /* Hero Header Container */
     .hero-container {
         text-align: center;
         padding: 30px 20px;
@@ -86,7 +82,6 @@ st.markdown("""
         border: 1px solid #a7f3d0;
     }
 
-    /* Modern UI Cards for Sections */
     .ui-card {
         background: #ffffff;
         padding: 24px;
@@ -96,7 +91,6 @@ st.markdown("""
         margin-bottom: 20px;
     }
 
-    /* Pulsing Biohazard Alert for Diseased Plants */
     .pulse-alert {
         animation: pulse-red 2s infinite;
         border-radius: 16px;
@@ -112,7 +106,6 @@ st.markdown("""
         100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
     }
 
-    /* Success Healthy Badge */
     .healthy-badge {
         border-radius: 16px;
         padding: 20px;
@@ -122,7 +115,6 @@ st.markdown("""
         box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.1);
     }
 
-    /* Sidebar Styling */
     .sidebar-logo {
         font-size: 4rem;
         line-height: 1;
@@ -147,13 +139,14 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 2. PATH RESOLUTION & CONSTANTS
+# 2. PATH RESOLUTION & CONSTANTS (UPDATED FOR TFLITE)
 # ==========================================
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-DEFAULT_MODEL_PATH = os.path.join(BASE_DIR, "models", "optimized_mobilenet.keras")
-FALLBACK_MODEL_PATH = os.path.join(BASE_DIR, "models", "baseline_cnn.keras")
+# Changed to .tflite formats
+DEFAULT_MODEL_PATH = os.path.join(BASE_DIR, "models", "optimized_mobilenet.tflite")
+FALLBACK_MODEL_PATH = os.path.join(BASE_DIR, "models", "baseline_cnn.tflite")
 
-# VERIFIED ASCII ALPHABETICAL ORDERING (E -> L -> h)
+# VERIFIED ASCII ALPHABETICAL ORDERING
 CLASS_NAMES = ["Tomato Early Blight", "Tomato Late Blight", "Tomato Healthy"]
 
 TREATMENT_GUIDES = {
@@ -178,14 +171,19 @@ TREATMENT_GUIDES = {
 }
 
 # ==========================================
-# 3. HELPER FUNCTIONS
+# 3. HELPER FUNCTIONS (UPDATED FOR TFLITE)
 # ==========================================
 @st.cache_resource
 def load_classifier():
+    """Loads a TFLite model using tf.lite.Interpreter and allocates tensors."""
     if os.path.exists(DEFAULT_MODEL_PATH):
-        return tf.keras.models.load_model(DEFAULT_MODEL_PATH), "Optimized MobileNetV2"
+        interpreter = tf.lite.Interpreter(model_path=DEFAULT_MODEL_PATH)
+        interpreter.allocate_tensors()
+        return interpreter, "Optimized MobileNetV2 (TFLite Edge)"
     elif os.path.exists(FALLBACK_MODEL_PATH):
-        return tf.keras.models.load_model(FALLBACK_MODEL_PATH), "Baseline Custom CNN"
+        interpreter = tf.lite.Interpreter(model_path=FALLBACK_MODEL_PATH)
+        interpreter.allocate_tensors()
+        return interpreter, "Baseline CNN (TFLite Edge)"
     return None, None
 
 def check_image_sharpness(pil_img, threshold=80.0):
@@ -199,7 +197,7 @@ CROPSENSE AI | FIELD DIAGNOSTIC CERTIFICATE
 ==================================================
 Scan Timestamp  : {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 Field Location  : Sector 4-B (Geotag: 13.0827° N, 80.2707° E)
-AI Engine       : TensorFlow Edge / Keras
+AI Engine       : TensorFlow Lite / Edge
 Inference Speed : {latency:.2f} ms
 
 --- ENVIRONMENTAL TELEMETRY ---
@@ -226,12 +224,12 @@ Report generated automatically by CropSense AI Edge System.
 # ==========================================
 # 4. SIDEBAR: TELEMETRY & SYSTEM STATUS
 # ==========================================
-model, model_name = load_classifier()
+interpreter, model_name = load_classifier()
 
 with st.sidebar:
     st.markdown('<div class="sidebar-logo">🌿</div>', unsafe_allow_html=True)
     st.markdown("<h2 style='margin-bottom: 2px; color: #059669; font-size: 1.8rem;'>CropSense AI</h2>", unsafe_allow_html=True)
-    st.caption("Powered by MobileNetV2 & TensorFlow")
+    st.caption("Powered by TensorFlow Lite Edge")
     st.markdown("---")
     
     st.subheader("📡 Live Microclimate")
@@ -247,7 +245,7 @@ with st.sidebar:
         
     st.markdown("---")
     st.subheader("⚙️ System Status")
-    if model is not None:
+    if interpreter is not None:
         st.markdown(f"**Engine:** `{model_name}`")
         st.markdown("<div class='online-dot'></div> <b>Online & Ready</b>", unsafe_allow_html=True)
     else:
@@ -268,15 +266,15 @@ st.markdown("""
         Get instant laboratory-grade precision in the field.
     </div>
     <div>
-        <span class="feature-badge">⚡ Deep Learning Powered</span>
+        <span class="feature-badge">⚡ Edge Device Ready</span>
         <span class="feature-badge">🔍 Real-Time Diagnosis</span>
         <span class="feature-badge">💊 Actionable Protocols</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-if model is None:
-    st.error("❌ **System Offline:** Could not locate model weights. Please ensure `models/optimized_mobilenet.keras` exists!")
+if interpreter is None:
+    st.error("❌ **System Offline:** Could not locate model weights. Please ensure `models/baseline_cnn.tflite` exists!")
     st.stop()
 
 # Multi-Modal Ingestion Tabs
@@ -332,14 +330,14 @@ if input_image is not None:
         for percent_complete in range(0, 101, 20):
             time.sleep(0.08)
             scan_bar.progress(percent_complete)
-            status_text.caption(f"Extracting neural features... {percent_complete}%")
+            status_text.caption(f"Extracting TFLite features... {percent_complete}%")
             
         status_text.empty()
         scan_bar.empty()
         
-        # Execute actual inference logic
+        # Execute actual inference logic using the interpreter
         predicted_label, confidence, all_probs_dict = predict_image(
-            model, input_image, class_names=CLASS_NAMES
+            interpreter, input_image, class_names=CLASS_NAMES
         )
         latency_ms = (time.time() - start_time) * 1000
         guide = TREATMENT_GUIDES[predicted_label]
