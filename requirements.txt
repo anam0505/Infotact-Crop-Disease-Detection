@@ -1,8 +1,8 @@
 streamlit
 tensorflow==2.16.1
+keras==3.3.3
 numpy
-pandas
 opencv-python-headless
-Pillow
+pillow
 matplotlib
 scikit-learn
